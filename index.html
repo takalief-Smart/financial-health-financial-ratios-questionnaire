@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استبيان المؤشرات المالية الرئيسية - تكاليف | تقييم الصحة المالية للشركات</title>
+    <!-- Bootstrap RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1e4a3b 0%, #2d6a4e 100%);
+            min-height: 100vh;
+            color: #1e3a3a;
+            padding: 20px;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-bottom: 3px solid #52b788;
+        }
+        
+        .company-badge {
+            background: rgba(82, 183, 136, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 600;
+            border: 1px solid #52b788;
+            color: white;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+            margin-bottom: 2rem;
+            background-color: #f8faf8;
+            border: 1px solid #e4f2e4;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #1e4a3b 0%, #2d6a4e 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-bottom: 2px solid #52b788;
+        }
+        
+        .btn-custom {
+            background: #52b788;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #1e4a3b;
+        }
+        
+        .btn-custom:hover {
+            background: #2d6a4e;
+            transform: scale(1.05);
+            color: white;
+            box-shadow: 0 5px 20px rgba(82, 183, 136, 0.4);
+        }
+        
+        .btn-excel {
+            background: #1e4a3b;
+            color: white;
+            border: 2px solid #52b788;
+        }
+        
+        .btn-excel:hover {
+            background: #2d6a4e;
+            color: white;
+        }
+        
+        .btn-pdf {
+            background: #4a6b5a;
+            color: white;
+            border: 2px solid #52b788;
+        }
+        
+        .btn-pdf:hover {
+            background: #1e4a3b;
+            color: white;
+        }
+        
+        .form-label {
+            color: #2d6a4e;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e4f2e4;
+            border-radius: 10px;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #52b788;
+            box-shadow: 0 0 0 0.2rem rgba(82, 183, 136, 0.25);
+        }
+        
+        .data-entry-section {
+            background: #f0f7f0;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 3px solid #52b788;
+        }
+        
+        .client-info-card {
+            background: linear-gradient(135deg, #f8faf8 0%, #ffffff 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid #52b788;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .client-info-title {
+            color: #1e4a3b;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .client-info-title i {
+            color: #52b788;
+            margin-left: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .currency-badge {
+            background: #52b788;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .info-text {
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        .required-field::after {
+            content: "*";
+            color: #dc3545;
+            margin-right: 4px;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+            border-radius: 50px 50px 0 0;
+            border-top: 3px solid #52b788;
+        }
+        
+        .footer-links {
+            color: #e4f2e4;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links:hover {
+            color: #52b788;
+            padding-right: 5px;
+        }
+        
+        .contact-item {
+            margin-bottom: 10px;
+            color: #e4f2e4;
+        }
+        
+        .contact-item i {
+            color: #52b788;
+            margin-left: 10px;
+            width: 20px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(82, 183, 136, 0.2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            color: #52b788;
+            transition: all 0.3s ease;
+            border: 1px solid #52b788;
+        }
+        
+        .social-icon:hover {
+            background: #52b788;
+            color: #0e3b2c;
+            transform: translateY(-3px);
+        }
+        
+        .nav-tabs-custom {
+            border-bottom: 3px solid #52b788;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #1e4a3b 0%, #2d6a4e 100%);
+            border-radius: 50px;
+            padding: 0.5rem;
+        }
+        
+        .nav-tabs-custom .nav-link {
+            color: white !important;
+            font-weight: 600;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs-custom .nav-link i {
+            color: white;
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+            color: #1e4a3b !important;
+            background: #52b788;
+            border: 2px solid white;
+        }
+        
+        .nav-tabs-custom .nav-link.active i {
+            color: #1e4a3b;
+        }
+        
+        .preview-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 2px solid #52b788;
+            margin-bottom: 1.5rem;
+        }
+        
+        .preview-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e4f2e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .preview-label {
+            font-weight: 600;
+            color: #1e4a3b;
+            width: 50%;
+        }
+        
+        .preview-value {
+            color: #2d6a4e;
+            width: 50%;
+            text-align: left;
+        }
+        
+        .year-item {
+            background: #f8faf8;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e4f2e4;
+        }
+        
+        /* PDF Export Container */
+        #pdf-export-container {
+            position: fixed;
+            top: -99999px;
+            left: -99999px;
+            width: 800px;
+            background: white;
+            z-index: 9999;
+            padding: 30px;
+            opacity: 0;
+            pointer-events: none;
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .pdf-wrapper {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            direction: rtl;
+        }
+        
+        .pdf-cover {
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 4px solid #52b788;
+            text-align: center;
+        }
+        
+        .pdf-section-title {
+            color: #1e4a3b;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #52b788;
+        }
+        
+        .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 11px;
+            border: 1px solid #52b788;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .pdf-table th {
+            background: #1e4a3b;
+            color: white;
+            padding: 8px 6px;
+            font-weight: 700;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .pdf-table td {
+            padding: 6px;
+            border: 1px solid #e4f2e4;
+            text-align: center;
+            font-size: 10px;
+        }
+        
+        .pdf-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0e3b2c 0%, #1b5e3f 100%);
+            color: white;
+            border-radius: 15px;
+            border: 2px solid #52b788;
+        }
+        
+        .indicator-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        .indicator-good {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+        
+        .indicator-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        
+        .indicator-poor {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header text-center no-print">
+        <div class="container">
+            <span class="company-badge mb-3">تكاليف | حلول أعمال ذكية</span>
+            <h1 class="display-4 fw-bold mt-3" style="color: white;">
+                <i class="fas fa-chart-line me-3"></i>
+                استبيان المؤشرات المالية الرئيسية
+            </h1>
+            <p class="lead" style="color: white;">خدمة تقييم الصحة المالية للشركات - جمع بيانات المؤشرات المالية الرئيسية (السيولة، الربحية، الملاءة، النشاط، السوق)</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs-custom nav-fill" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="data-entry-tab" data-bs-toggle="tab" data-bs-target="#dataEntry" type="button" role="tab">
+                    <i class="fas fa-edit me-2"></i> استبيان المعلومات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab">
+                    <i class="fas fa-eye me-2"></i> معاينة التقرير
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Tab 1: Data Entry -->
+            <div class="tab-pane fade show active" id="dataEntry" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-database me-2"></i> استبيان المؤشرات المالية الرئيسية
+                    </div>
+                    <div class="card-body">
+                        <!-- بيانات الشركة -->
+                        <div class="client-info-card">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="client-info-title"><i class="fas fa-building"></i> بيانات الشركة</div>
+                                    <div class="mb-3"><label class="form-label required-field">اسم الشركة</label><input type="text" class="form-control" id="companyName" placeholder="أدخل اسم الشركة"></div>
+                                    <div class="mb-3"><label class="form-label">النشاط الرئيسي</label><input type="text" class="form-control" id="businessActivity" placeholder="مثال: تجارة التجزئة، صناعة، خدمات"></div>
+                                    <div class="mb-3"><label class="form-label">السجل التجاري</label><input type="text" class="form-control" id="commercialRegister" placeholder="رقم السجل التجاري"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="client-info-title"><i class="fas fa-address-card"></i> بيانات التواصل</div>
+                                    <div class="mb-3"><label class="form-label required-field">اسم جهة الاتصال</label><input type="text" class="form-control" id="contactPerson" placeholder="أدخل اسم المسؤول"></div>
+                                    <div class="mb-3"><label class="form-label required-field">رقم الهاتف</label><input type="tel" class="form-control" id="clientPhone" placeholder="أدخل رقم الهاتف"></div>
+                                    <div class="mb-3"><label class="form-label required-field">البريد الإلكتروني</label><input type="email" class="form-control" id="clientEmail" placeholder="example@company.com"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">العملة المستخدمة</label><select class="form-select" id="currencySelect"><option value="EGP" selected>🇪🇬 جنيه مصري (EGP)</option><option value="SAR">🇸🇦 ريال سعودي (SAR)</option><option value="AED">🇦🇪 درهم إماراتي (AED)</option><option value="USD">🇺🇸 دولار أمريكي (USD)</option></select></div></div>
+                                <div class="col-md-4"><div class="mb-3"><label class="form-label">تاريخ التعبئة</label><input type="date" class="form-control" id="submissionDate" value="2026-03-24"></div></div>
+                                <div class="col-md-4"><div class="currency-badge mt-4" id="currencyDisplay"><i class="fas fa-money-bill-wave me-2"></i>العملة: جنيه مصري</div></div>
+                            </div>
+                        </div>
+
+                        <!-- الفترة المالية -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-calendar-alt me-2"></i> القسم الأول: الفترة المالية</h4>
+                            <div class="row">
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">آخر سنة مالية منتهية</label><input type="text" class="form-control" id="lastFiscalYear" placeholder="مثال: 2025"></div></div>
+                                <div class="col-md-6"><div class="mb-3"><label class="form-label">عدد السنوات المطلوب تحليلها</label><select class="form-select" id="yearsCount"><option value="3">3 سنوات</option><option value="4">4 سنوات</option><option value="5" selected>5 سنوات</option></select></div></div>
+                            </div>
+                        </div>
+
+                        <!-- القسم 2: مؤشرات السيولة -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-tint me-2"></i> القسم الثاني: مؤشرات السيولة (Liquidity Ratios)</h4>
+                            <div id="liquidityContainer"></div>
+                        </div>
+
+                        <!-- القسم 3: مؤشرات الربحية -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-chart-line me-2"></i> القسم الثالث: مؤشرات الربحية (Profitability Ratios)</h4>
+                            <div id="profitabilityContainer"></div>
+                        </div>
+
+                        <!-- القسم 4: مؤشرات الملاءة المالية -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-shield-alt me-2"></i> القسم الرابع: مؤشرات الملاءة المالية (Solvency Ratios)</h4>
+                            <div id="solvencyContainer"></div>
+                        </div>
+
+                        <!-- القسم 5: مؤشرات النشاط -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-chart-simple me-2"></i> القسم الخامس: مؤشرات النشاط (Activity Ratios)</h4>
+                            <div id="activityContainer"></div>
+                        </div>
+
+                        <!-- القسم 6: مؤشرات السوق -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-chart-line me-2"></i> القسم السادس: مؤشرات السوق (Market Ratios)</h4>
+                            <div id="marketContainer"></div>
+                        </div>
+
+                        <!-- القسم 7: معلومات إضافية -->
+                        <div class="data-entry-section">
+                            <h4 class="mb-4" style="color: #1e4a3b;"><i class="fas fa-info-circle me-2"></i> القسم السابع: معلومات إضافية</h4>
+                            <div class="row">
+                                <div class="col-md-12"><div class="mb-3"><label class="form-label">أي معلومات إضافية</label><textarea class="form-control" id="additionalInfo" rows="3" placeholder="معلومات إضافية قد تساعد في تحليل المؤشرات المالية"></textarea></div></div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="btn btn-custom btn-lg" onclick="refreshPreview()"><i class="fas fa-sync-alt me-2"></i> تحديث المعاينة</button>
+                            <button class="btn btn-custom btn-lg mx-2" onclick="resetForm()"><i class="fas fa-undo me-2"></i> إعادة تعيين</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Preview -->
+            <div class="tab-pane fade" id="preview" role="tabpanel">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-file-alt me-2"></i> معاينة تقرير المؤشرات المالية الرئيسية</div>
+                    <div class="card-body" id="previewContent"></div>
+                </div>
+                <div class="text-center mb-4 no-print">
+                    <button class="btn btn-excel btn-lg mx-2" onclick="exportToExcel()"><i class="fas fa-file-excel me-2"></i> تصدير (Excel)</button>
+                    <button class="btn btn-pdf btn-lg mx-2" onclick="exportToPDF(event)"><i class="fas fa-file-pdf me-2"></i> تصدير التقرير (PDF)</button>
+                    <button class="btn btn-custom btn-lg mx-2" onclick="window.print()"><i class="fas fa-print me-2"></i> طباعة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer no-print">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4"><h5 style="color: #52b788;">تكاليف - حلول أعمال ذكية</h5><p style="color: #e4f2e4;">نقدم خدمات تقييم الصحة المالية للشركات وتحليل المؤشرات المالية.</p></div>
+                <div class="col-md-4 mb-4"><h5 style="color: #52b788;"><i class="fas fa-address-card me-2"></i>معلومات الاتصال</h5><div class="contact-item"><i class="fas fa-map-marker-alt"></i> القاهرة - مصر</div><div class="contact-item"><i class="fas fa-phone-alt"></i><a href="tel:+201044391177" class="footer-links">+20 104 439 1177</a></div><div class="contact-item"><i class="fas fa-envelope"></i><a href="mailto:info@takalief.com" class="footer-links">info@takalief.com</a></div></div>
+                <div class="col-md-4 mb-4"><h5 style="color: #52b788;"><i class="fas fa-share-alt me-2"></i>تابعنا على</h5><div class="text-center"><a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a><a href="#" class="social-icon"><i class="fab fa-twitter"></i></a><a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a><a href="#" class="social-icon"><i class="fab fa-instagram"></i></a></div></div>
+            </div>
+            <hr>
+            <div class="row mt-3"><div class="col-md-6 text-md-start text-center"><p class="mb-0" style="color: #e4f2e4;"><i class="fas fa-copyright me-2" style="color: #52b788;"></i>2026 تكاليف - جميع الحقوق محفوظة</p></div></div>
+        </div>
+    </footer>
+
+    <div id="pdf-export-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let selectedCurrency = 'EGP';
+        let yearCount = 5;
+        
+        const currencySymbols = { 'EGP': 'جنيه', 'SAR': 'ريال', 'AED': 'درهم', 'USD': 'دولار' };
+        const currencyNames = { 'EGP': 'جنيه مصري', 'SAR': 'ريال سعودي', 'AED': 'درهم إماراتي', 'USD': 'دولار أمريكي' };
+        
+        document.getElementById('currencySelect').addEventListener('change', function() {
+            selectedCurrency = this.value;
+            document.getElementById('currencyDisplay').innerHTML = '<i class="fas fa-money-bill-wave me-2"></i>العملة: ' + currencyNames[selectedCurrency];
+            updateCurrencySymbols();
+        });
+        
+        function updateCurrencySymbols() {
+            var symbol = currencySymbols[selectedCurrency];
+            document.querySelectorAll('.currency-symbol').forEach(function(el) {
+                el.textContent = symbol;
+            });
+        }
+        
+        function getFieldValue(id, defaultValue) {
+            if (defaultValue === undefined) defaultValue = '—';
+            var element = document.getElementById(id);
+            return element && element.value.trim() !== '' ? element.value.trim() : defaultValue;
+        }
+        
+        function getSelectText(id, defaultValue) {
+            if (defaultValue === undefined) defaultValue = '—';
+            var select = document.getElementById(id);
+            if (select && select.options[select.selectedIndex] && select.options[select.selectedIndex].value !== '') {
+                return select.options[select.selectedIndex].text;
+            }
+            return defaultValue;
+        }
+        
+        function createIndicatorInputs(containerId, title, indicators) {
+            var container = document.getElementById(containerId);
+            var html = '';
+            for (var i = 1; i <= yearCount; i++) {
+                var yearValue = 2026 - i;
+                html += '<div class="year-item"><div class="row mb-2"><div class="col-md-3"><div class="input-group"><input type="text" class="form-control" placeholder="السنة" id="yearName' + containerId + i + '" value="' + yearValue + '"><span class="input-group-text bg-light">م</span></div></div></div>';
+                html += '<div class="row"><div class="col-md-12"><table class="table table-sm table-bordered"><thead><tr><th>المؤشر</th><th>القيمة</th><th>الوحدة</th></tr></thead><tbody>';
+                for (var j = 0; j < indicators.length; j++) {
+                    var indicator = indicators[j];
+                    html += '<tr><td>' + indicator.name + '<div class="small text-muted">' + indicator.desc + '</div></td>';
+                    html += '<td><input type="text" class="form-control form-control-sm" placeholder="القيمة" id="' + indicator.id + i + '"></td>';
+                    html += '<td>' + indicator.unit + '</td></tr>';
+                }
+                html += '</tbody></table></div></div></div>';
+            }
+            container.innerHTML = html;
+        }
+        
+        // تعريف المؤشرات لكل مجموعة
+        var liquidityIndicators = [
+            { name: 'النسبة المتداولة (Current Ratio)', id: 'currentRatio', desc: 'الأصول المتداولة / الخصوم المتداولة', unit: 'مرة' },
+            { name: 'النسبة السريعة (Quick Ratio)', id: 'quickRatio', desc: '(الأصول المتداولة - المخزون) / الخصوم المتداولة', unit: 'مرة' },
+            { name: 'النقدية إلى الخصوم المتداولة', id: 'cashRatio', desc: '(النقدية + الاستثمارات قصيرة الأجل) / الخصوم المتداولة', unit: 'مرة' }
+        ];
+        
+        var profitabilityIndicators = [
+            { name: 'هامش الربح الإجمالي', id: 'grossProfitMargin', desc: '(مجمل الربح / الإيرادات) × 100', unit: '%' },
+            { name: 'هامش الربح التشغيلي', id: 'operatingProfitMargin', desc: '(صافي الربح التشغيلي / الإيرادات) × 100', unit: '%' },
+            { name: 'هامش صافي الربح', id: 'netProfitMargin', desc: '(صافي الربح / الإيرادات) × 100', unit: '%' },
+            { name: 'العائد على الأصول (ROA)', id: 'roa', desc: '(صافي الربح / إجمالي الأصول) × 100', unit: '%' },
+            { name: 'العائد على حقوق الملكية (ROE)', id: 'roe', desc: '(صافي الربح / حقوق الملكية) × 100', unit: '%' }
+        ];
+        
+        var solvencyIndicators = [
+            { name: 'نسبة المديونية', id: 'debtRatio', desc: 'إجمالي الخصوم / إجمالي الأصول', unit: '%' },
+            { name: 'نسبة الدين إلى حقوق الملكية', id: 'debtToEquity', desc: 'إجمالي الخصوم / حقوق الملكية', unit: 'مرة' },
+            { name: 'نسبة تغطية الفوائد', id: 'interestCoverage', desc: 'صافي الربح التشغيلي / مصروفات الفوائد', unit: 'مرة' }
+        ];
+        
+        var activityIndicators = [
+            { name: 'معدل دوران المخزون', id: 'inventoryTurnover', desc: 'تكلفة المبيعات / متوسط المخزون', unit: 'مرة' },
+            { name: 'متوسط فترة تحصيل الديون', id: 'receivablesDays', desc: '(حسابات العملاء / الإيرادات) × 365', unit: 'يوم' },
+            { name: 'معدل دوران الأصول', id: 'assetTurnover', desc: 'الإيرادات / إجمالي الأصول', unit: 'مرة' }
+        ];
+        
+        var marketIndicators = [
+            { name: 'ربحية السهم (EPS)', id: 'eps', desc: 'صافي الربح / عدد الأسهم القائمة', unit: currencySymbols[selectedCurrency] },
+            { name: 'مضاعف الربحية (P/E)', id: 'peRatio', desc: 'سعر السهم / ربحية السهم', unit: 'مرة' },
+            { name: 'القيمة الدفترية للسهم', id: 'bookValue', desc: 'حقوق الملكية / عدد الأسهم القائمة', unit: currencySymbols[selectedCurrency] }
+        ];
+        
+        function createAllInputs() {
+            createIndicatorInputs('liquidityContainer', 'مؤشرات السيولة', liquidityIndicators);
+            createIndicatorInputs('profitabilityContainer', 'مؤشرات الربحية', profitabilityIndicators);
+            createIndicatorInputs('solvencyContainer', 'مؤشرات الملاءة', solvencyIndicators);
+            createIndicatorInputs('activityContainer', 'مؤشرات النشاط', activityIndicators);
+            createIndicatorInputs('marketContainer', 'مؤشرات السوق', marketIndicators);
+        }
+        
+        function getIndicatorsList(indicators, prefix, yearCount) {
+            var html = '';
+            for (var i = 1; i <= yearCount; i++) {
+                var yearNameElem = document.getElementById('yearName' + prefix + i);
+                var yearName = yearNameElem ? yearNameElem.value : 'سنة ' + i;
+                html += '<div class="preview-item"><span class="preview-label"><strong>' + yearName + '</strong></span><span class="preview-value">';
+                for (var j = 0; j < indicators.length; j++) {
+                    var indicator = indicators[j];
+                    var value = getFieldValue(indicator.id + i, '—');
+                    html += indicator.name + ': ' + value + ' ' + indicator.unit + '<br>';
+                }
+                html += '</span></div>';
+            }
+            return html;
+        }
+        
+        function refreshPreview() {
+            var liquidityHtml = getIndicatorsList(liquidityIndicators, 'liquidityContainer', yearCount);
+            var profitabilityHtml = getIndicatorsList(profitabilityIndicators, 'profitabilityContainer', yearCount);
+            var solvencyHtml = getIndicatorsList(solvencyIndicators, 'solvencyContainer', yearCount);
+            var activityHtml = getIndicatorsList(activityIndicators, 'activityContainer', yearCount);
+            var marketHtml = getIndicatorsList(marketIndicators, 'marketContainer', yearCount);
+            
+            var previewHtml = `
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-building me-2"></i>بيانات الشركة</h4>
+                <div class="preview-item"><span class="preview-label">اسم الشركة</span><span class="preview-value">${getFieldValue('companyName')}</span></div>
+                <div class="preview-item"><span class="preview-label">النشاط الرئيسي</span><span class="preview-value">${getFieldValue('businessActivity')}</span></div>
+                <div class="preview-item"><span class="preview-label">السجل التجاري</span><span class="preview-value">${getFieldValue('commercialRegister')}</span></div>
+                <div class="preview-item"><span class="preview-label">جهة الاتصال</span><span class="preview-value">${getFieldValue('contactPerson')}</span></div>
+                <div class="preview-item"><span class="preview-label">رقم الهاتف</span><span class="preview-value">${getFieldValue('clientPhone')}</span></div>
+                <div class="preview-item"><span class="preview-label">البريد الإلكتروني</span><span class="preview-value">${getFieldValue('clientEmail')}</span></div>
+                <div class="preview-item"><span class="preview-label">العملة</span><span class="preview-value">${currencyNames[selectedCurrency]}</span></div>
+                <div class="preview-item"><span class="preview-label">آخر سنة مالية</span><span class="preview-value">${getFieldValue('lastFiscalYear')}</span></div></div>
+                
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-tint me-2"></i>مؤشرات السيولة</h4>${liquidityHtml}</div>
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-chart-line me-2"></i>مؤشرات الربحية</h4>${profitabilityHtml}</div>
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-shield-alt me-2"></i>مؤشرات الملاءة المالية</h4>${solvencyHtml}</div>
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-chart-simple me-2"></i>مؤشرات النشاط</h4>${activityHtml}</div>
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-chart-line me-2"></i>مؤشرات السوق</h4>${marketHtml}</div>
+                <div class="preview-card"><h4 style="color: #1e4a3b;"><i class="fas fa-info-circle me-2"></i>معلومات إضافية</h4><div class="preview-item"><span class="preview-label">معلومات إضافية</span><span class="preview-value">${getFieldValue('additionalInfo')}</span></div></div>
+                <div class="preview-card text-center"><hr><p style="color: #1e4a3b; font-weight: 600;"><i class="fas fa-check-circle me-2"></i>تم تعبئة استبيان المؤشرات المالية الرئيسية بنجاح</p><p class="text-muted small">تاريخ الإصدار: ${new Date().toLocaleDateString('ar-EG')}</p></div>
+            `;
+            document.getElementById('previewContent').innerHTML = previewHtml;
+        }
+        
+        function resetForm() {
+            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟')) {
+                location.reload();
+            }
+        }
+        
+        function exportToExcel() {
+            var companyName = getFieldValue('companyName', 'شركة');
+            var excelData = [
+                ['استبيان المؤشرات المالية الرئيسية - تكاليف'], ['تاريخ التقرير', new Date().toLocaleDateString('ar-EG')], ['اسم الشركة', companyName], ['العملة', currencyNames[selectedCurrency]], [],
+                ['1. بيانات الشركة'], ['اسم الشركة', getFieldValue('companyName')], ['النشاط الرئيسي', getFieldValue('businessActivity')], ['السجل التجاري', getFieldValue('commercialRegister')], ['جهة الاتصال', getFieldValue('contactPerson')], ['رقم الهاتف', getFieldValue('clientPhone')], ['البريد الإلكتروني', getFieldValue('clientEmail')], ['آخر سنة مالية', getFieldValue('lastFiscalYear')], [],
+                ['2. مؤشرات السيولة'], ['السنة', 'النسبة المتداولة', 'النسبة السريعة', 'النقدية إلى الخصوم المتداولة']
+            ];
+            for (var i = 1; i <= yearCount; i++) {
+                var yearNameElem = document.getElementById('yearName' + 'liquidityContainer' + i);
+                var yearName = yearNameElem ? yearNameElem.value : 'سنة ' + i;
+                excelData.push([yearName, getFieldValue('currentRatio' + i, '—'), getFieldValue('quickRatio' + i, '—'), getFieldValue('cashRatio' + i, '—')]);
+            }
+            excelData.push([], ['3. مؤشرات الربحية'], ['السنة', 'هامش الربح الإجمالي', 'هامش الربح التشغيلي', 'هامش صافي الربح', 'العائد على الأصول ROA', 'العائد على حقوق الملكية ROE']);
+            for (var i = 1; i <= yearCount; i++) {
+                var yearNameElem = document.getElementById('yearName' + 'profitabilityContainer' + i);
+                var yearName = yearNameElem ? yearNameElem.value : 'سنة ' + i;
+                excelData.push([yearName, getFieldValue('grossProfitMargin' + i, '—'), getFieldValue('operatingProfitMargin' + i, '—'), getFieldValue('netProfitMargin' + i, '—'), getFieldValue('roa' + i, '—'), getFieldValue('roe' + i, '—')]);
+            }
+            excelData.push([], ['4. مؤشرات الملاءة المالية'], ['السنة', 'نسبة المديونية', 'نسبة الدين إلى حقوق الملكية', 'نسبة تغطية الفوائد']);
+            for (var i = 1; i <= yearCount; i++) {
+                var yearNameElem = document.getElementById('yearName' + 'solvencyContainer' + i);
+                var yearName = yearNameElem ? yearNameElem.value : 'سنة ' + i;
+                excelData.push([yearName, getFieldValue('debtRatio' + i, '—'), getFieldValue('debtToEquity' + i, '—'), getFieldValue('interestCoverage' + i, '—')]);
+            }
+            excelData.push([], ['5. مؤشرات النشاط'], ['السنة', 'معدل دوران المخزون', 'متوسط فترة تحصيل الديون', 'معدل دوران الأصول']);
+            for (var i = 1; i <= yearCount; i++) {
+                var yearNameElem = document.getElementById('yearName' + 'activityContainer' + i);
+                var yearName = yearNameElem ? yearNameElem.value : 'سنة ' + i;
+                excelData.push([yearName, getFieldValue('inventoryTurnover' + i, '—'), getFieldValue('receivablesDays' + i, '—'), getFieldValue('assetTurnover' + i, '—')]);
+            }
+            excelData.push([], ['6. مؤشرات السوق'], ['السنة', 'ربحية السهم EPS', 'مضاعف الربحية P/E', 'القيمة الدفترية للسهم']);
+            for (var i = 1; i <= yearCount; i++) {
+                var yearNameElem = document.getElementById('yearName' + 'marketContainer' + i);
+                var yearName = yearNameElem ? yearNameElem.value : 'سنة ' + i;
+                excelData.push([yearName, getFieldValue('eps' + i, '—'), getFieldValue('peRatio' + i, '—'), getFieldValue('bookValue' + i, '—')]);
+            }
+            excelData.push([], ['7. معلومات إضافية'], ['معلومات إضافية', getFieldValue('additionalInfo')], [], ['للتواصل: info@takalief.com | +20 104 439 1177'], ['www.takalief.com']);
+            
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(excelData);
+            XLSX.utils.book_append_sheet(wb, ws, 'المؤشرات المالية');
+            XLSX.writeFile(wb, 'Financial_Ratios_' + companyName.replace(/\s/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.xlsx');
+            alert('تم تصدير استبيان Excel بنجاح!');
+        }
+        
+        async function exportToPDF(event) {
+            try {
+                var exportBtn = event.target;
+                var originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري إعداد التقرير...';
+                exportBtn.disabled = true;
+                
+                var pdfContainer = document.getElementById('pdf-export-container');
+                pdfContainer.innerHTML = '';
+                pdfContainer.style.opacity = '1';
+                pdfContainer.style.position = 'absolute';
+                pdfContainer.style.top = '0';
+                pdfContainer.style.left = '0';
+                pdfContainer.style.zIndex = '9999';
+                
+                var companyName = getFieldValue('companyName', 'غير محدد');
+                var clientName = getFieldValue('contactPerson', 'غير محدد');
+                var currentDate = new Date().toLocaleDateString('ar-EG');
+                
+                // جمع بيانات المؤشرات
+                var liquidityRows = '', profitabilityRows = '', solvencyRows = '', activityRows = '', marketRows = '';
+                for (var i = 1; i <= yearCount; i++) {
+                    var yearNameL = document.getElementById('yearName' + 'liquidityContainer' + i);
+                    var yearNameP = document.getElementById('yearName' + 'profitabilityContainer' + i);
+                    var yearNameS = document.getElementById('yearName' + 'solvencyContainer' + i);
+                    var yearNameA = document.getElementById('yearName' + 'activityContainer' + i);
+                    var yearNameM = document.getElementById('yearName' + 'marketContainer' + i);
+                    var yearL = yearNameL ? yearNameL.value : 'سنة ' + i;
+                    var yearP = yearNameP ? yearNameP.value : 'سنة ' + i;
+                    var yearS = yearNameS ? yearNameS.value : 'سنة ' + i;
+                    var yearA = yearNameA ? yearNameA.value : 'سنة ' + i;
+                    var yearM = yearNameM ? yearNameM.value : 'سنة ' + i;
+                    
+                    liquidityRows += '<tr><td>' + yearL + '</td><td>' + getFieldValue('currentRatio' + i, '—') + '</td><td>' + getFieldValue('quickRatio' + i, '—') + '</td><td>' + getFieldValue('cashRatio' + i, '—') + '</td></tr>';
+                    profitabilityRows += '<tr><td>' + yearP + '</td><td>' + getFieldValue('grossProfitMargin' + i, '—') + '</td><td>' + getFieldValue('operatingProfitMargin' + i, '—') + '</td><td>' + getFieldValue('netProfitMargin' + i, '—') + '</td><td>' + getFieldValue('roa' + i, '—') + '</td><td>' + getFieldValue('roe' + i, '—') + '</td></tr>';
+                    solvencyRows += '<tr><td>' + yearS + '</td><td>' + getFieldValue('debtRatio' + i, '—') + '</td><td>' + getFieldValue('debtToEquity' + i, '—') + '</td><td>' + getFieldValue('interestCoverage' + i, '—') + '</td></tr>';
+                    activityRows += '<tr><td>' + yearA + '</td><td>' + getFieldValue('inventoryTurnover' + i, '—') + '</td><td>' + getFieldValue('receivablesDays' + i, '—') + '</td><td>' + getFieldValue('assetTurnover' + i, '—') + '</td></tr>';
+                    marketRows += '<tr><td>' + yearM + '</td><td>' + getFieldValue('eps' + i, '—') + '</td><td>' + getFieldValue('peRatio' + i, '—') + '</td><td>' + getFieldValue('bookValue' + i, '—') + '</td></tr>';
+                }
+                
+                var pdfWrapper = document.createElement('div');
+                pdfWrapper.className = 'pdf-wrapper';
+                pdfWrapper.innerHTML = `
+                    <div class="pdf-cover">
+                        <h1>المؤشرات المالية الرئيسية</h1>
+                        <h3>Key Financial Ratios Questionnaire</h3>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-top: 30px; border: 2px solid #52b788;">
+                            <p><i class="fas fa-building me-2"></i>الشركة: ${companyName}</p>
+                            <p><i class="fas fa-user me-2"></i>جهة الاتصال: ${clientName}</p>
+                            <p><i class="fas fa-money-bill-wave me-2"></i>العملة: ${currencyNames[selectedCurrency]}</p>
+                            <p><i class="fas fa-calendar me-2"></i>تاريخ التقرير: ${currentDate}</p>
+                        </div>
+                    </div>
+                    <div style="page-break-before: always;">
+                        <h2 class="pdf-section-title">بيانات الشركة</h2>
+                        <table class="pdf-table"><tr><th>البيان</th><th>القيمة</th></tr>
+                        <tr><td><strong>اسم الشركة</strong></td><td>${getFieldValue('companyName')}</td></tr>
+                        <tr><td><strong>النشاط الرئيسي</strong></td><td>${getFieldValue('businessActivity')}</td></tr>
+                        <tr><td><strong>السجل التجاري</strong></td><td>${getFieldValue('commercialRegister')}</td></tr>
+                        <tr><td><strong>جهة الاتصال</strong></td><td>${getFieldValue('contactPerson')}</td></tr>
+                        <tr><td><strong>رقم الهاتف</strong></td><td>${getFieldValue('clientPhone')}</td></tr>
+                        <tr><td><strong>البريد الإلكتروني</strong></td><td>${getFieldValue('clientEmail')}</td></tr>
+                        <tr><td><strong>آخر سنة مالية</strong></td><td>${getFieldValue('lastFiscalYear')}</td></tr></table>
+                        
+                        <h2 class="pdf-section-title">مؤشرات السيولة</h2>
+                        <table class="pdf-table"><tr><th>السنة</th><th>النسبة المتداولة</th><th>النسبة السريعة</th><th>النقدية/الخصوم المتداولة</th></tr>${liquidityRows}</table>
+                        
+                        <h2 class="pdf-section-title">مؤشرات الربحية</h2>
+                        <table class="pdf-table"><tr><th>السنة</th><th>هامش الربح الإجمالي</th><th>هامش الربح التشغيلي</th><th>هامش صافي الربح</th><th>ROA</th><th>ROE</th></tr>${profitabilityRows}</table>
+                        
+                        <h2 class="pdf-section-title">مؤشرات الملاءة المالية</h2>
+                        <table class="pdf-table"><tr><th>السنة</th><th>نسبة المديونية</th><th>الدين/حقوق الملكية</th><th>تغطية الفوائد</th></tr>${solvencyRows}</table>
+                        
+                        <h2 class="pdf-section-title">مؤشرات النشاط</h2>
+                        <table class="pdf-table"><tr><th>السنة</th><th>معدل دوران المخزون</th><th>فترة تحصيل الديون</th><th>معدل دوران الأصول</th></tr>${activityRows}</table>
+                        
+                        <h2 class="pdf-section-title">مؤشرات السوق</h2>
+                        <table class="pdf-table"><tr><th>السنة</th><th>ربحية السهم EPS</th><th>مضاعف الربحية P/E</th><th>القيمة الدفترية للسهم</th></tr>${marketRows}</table>
+                        
+                        <h2 class="pdf-section-title">معلومات إضافية</h2>
+                        <table class="pdf-table"><tr><th>البيان</th><th>القيمة</th></tr>
+                        <tr><td><strong>معلومات إضافية</strong></td><td>${getFieldValue('additionalInfo')}</td></tr></table>
+                    </div>
+                    <div style="page-break-before: always; margin-top: 40px;">
+                        <div class="pdf-footer">
+                            <div class="company" style="font-size: 20px; font-weight: 700; color: #52b788;">تكاليف - حلول أعمال ذكية</div>
+                            <div>القاهرة - مصر | +20 104 439 1177 | info@takalief.com</div>
+                            <hr style="width: 150px; margin: 15px auto;">
+                            <p>تم تعبئة هذا الاستبيان لتقييم المؤشرات المالية للشركة</p>
+                            <p>تاريخ الإصدار: ${currentDate}</p>
+                            <p style="margin-top: 20px;">توقيع العميل: _________________________</p>
+                            <p>جميع الحقوق محفوظة © 2026</p>
+                        </div>
+                    </div>
+                `;
+                
+                pdfContainer.appendChild(pdfWrapper);
+                await new Promise(function(resolve) { setTimeout(resolve, 1500); });
+                
+                var canvas = await html2canvas(pdfContainer, { scale: 2, backgroundColor: '#ffffff', logging: false });
+                var imgData = canvas.toDataURL('image/png');
+                var imgWidth = 210;
+                var pageHeight = 297;
+                var imgHeight = (canvas.height * imgWidth) / canvas.width;
+                var heightLeft = imgHeight;
+                var position = 0;
+                
+                var pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                heightLeft -= pageHeight;
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save('Financial_Ratios_' + companyName.replace(/[^\u0600-\u06FFa-zA-Z0-9]/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+                
+                pdfContainer.innerHTML = '';
+                pdfContainer.style.opacity = '0';
+                pdfContainer.style.position = 'fixed';
+                pdfContainer.style.top = '-99999px';
+                
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+                alert('تم تصدير استبيان PDF بنجاح!');
+            } catch (error) {
+                alert('حدث خطأ: ' + error.message);
+                var exportBtn = event.target;
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf me-2"></i> تصدير التقرير (PDF)';
+                exportBtn.disabled = false;
+            }
+        }
+        
+        window.onload = function() {
+            updateCurrencySymbols();
+            createAllInputs();
+            refreshPreview();
+        };
+    </script>
+</body>
+</html>
